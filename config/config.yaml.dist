@@ -2,4 +2,5 @@
 
 twitter_url: ~ # The URL of your Twitter profile.
 github_url: ~ # The URL of your GitHub profile.
-sourire_service: ~ # The URL of the Sourire molecule rendering service.
+sourire_service: "http://localhost:8081/" # The URL of the Sourire molecule rendering service
+cache_dir: "/tmp/avogadrio" # THe directory to store cache entries

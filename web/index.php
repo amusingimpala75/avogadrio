@@ -1,5 +1,12 @@
 <?php
 
+// Send diagnostic output to the PHP server's stderr while debugging. Do not emit
+// it in HTTP responses, since this application serves PNGs from API endpoints.
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+ini_set('error_log', 'php://stderr');
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,11 +24,16 @@ $app = new Silex\Application();
 $app['debug'] = true;
 
 // Load config.
-$config = Spyc::YAMLLoad(__DIR__ . '/../config/config.yaml');
+$config = Spyc::YAMLLoad(getenv('AVOGADRIO_CONFIG'));
 
 // Services.
-$wikiSmilesConverter = new WikipediaSmilesConverter(new Database('names_wiki', __DIR__ . '/../db'));
-$smilesConverter = new CactusSmilesConverter(new Database('names', __DIR__ . '/../db'), $wikiSmilesConverter);
+$cacheDirectory = $config['cache_dir'];
+if (!is_dir($cacheDirectory)) {
+    @mkdir($cacheDirectory, 0770, true);
+}
+
+$wikiSmilesConverter = new WikipediaSmilesConverter(new Database('names_wiki', $cacheDirectory));
+$smilesConverter = new CactusSmilesConverter(new Database('names', $cacheDirectory), $wikiSmilesConverter);
 $moleculeRenderer = new MoleculeRenderer($config['sourire_service']);
 
 $moleculeRenderer->setRenderChiralLabels(false); // Disable chiral labels.

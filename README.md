@@ -1,3 +1,14 @@
+Seeing as the website is down last I checked I figured I try running this locally,
+so I added nix packaging scripts for both this and sourire which this requires, with
+minimal modifications. I have a few QoL things I'd like to support as well.
+
+- [ ] Should be able to customize the resolution instead of defaulting to 1920x1080
+- [ ] Clean up and modernize the code so the deprecation warnings are gone
+- [ ] Molecule size should be customizeable (Vitamin B12 doesn't render, I think it's too large)
+- [ ] Find modern alternative to sourire (molecule rendering is a bit odd compared to Wikipedia)
+- [ ] Replace external references to bootstrap, etc in templates/index.twig.html with npm installed jquery
+- [ ] Update all deps in npm
+
 # Avogadrio
 Worship your favorite molecule by setting it as your wallpaper.
 

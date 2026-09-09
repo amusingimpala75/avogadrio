@@ -1,0 +1,15 @@
+diff --git a/project.clj b/project.clj
+index 9945227919..12fb7ea97b 100644
+--- a/project.clj
++++ b/project.clj
+@@ -14,7 +14,9 @@
+                  [http-kit "2.1.16"]
+ 
+                  [com.ggasoftware/indigo "1.1.12"]
+-                 [com.ggasoftware.indigo/indigo-renderer "1.1.12"]]
++                 [com.ggasoftware.indigo/indigo-renderer "1.1.12"]
++
++                 [javax.xml.bind/jaxb-api "2.3.1"]]
+ 
+   :source-paths ["src"]
+ 
