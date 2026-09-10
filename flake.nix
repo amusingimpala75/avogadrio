@@ -6,6 +6,8 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     clojure-nix-locker.url = "github:bevuta/clojure-nix-locker";
     clojure-nix-locker.inputs.nixpkgs.follows = "nixpkgs";
+    nix2container.url = "github:nlewo/nix2container";
+    nix2container.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -21,14 +23,54 @@
         }:
         {
           packages = {
-            default = self'.packages.avogadrio;
+            default = pkgs.writeShellApplication {
+              name = "avogadrio-sourire";
+              text = ''
+                export AVOGADRIO_CONFIG=''${AVOGADRIO_CONFIG:-${./config/config.yaml.dist}}
+                avogadrio -S 0.0.0.0:8080 &
+                sourire :port 8081
+              '';
+              runtimeInputs = [
+                self'.packages.avogadrio
+                self'.packages.sourire
+              ];
+            };
+
+            container = inputs.nix2container.packages.${pkgs.stdenv.hostPlatform.system}.nix2container.buildImage {
+              name = "avogadrio";
+              copyToRoot = [
+                (pkgs.runCommand "avogadrio-config" { } ''
+                  mkdir -p $out/etc/avogadrio
+                  cp ${./config/config.yaml.dist} $out/etc/avogadrio/config.yaml
+                '')
+              ];
+              config = {
+                entrypoint = [ "${lib.getExe self'.packages.default}" ];
+                env = [
+                  "AVOGADRIO_CONFIG=/etc/avogadrio/config.yaml"
+                  "XDG_CACHE_HOME=/tmp"
+                ];
+              };
+              tag = "latest";
+            };
 
             avogadrio =
               let
+                src = lib.cleanSourceWith {
+                  src = ./.;
+                  filter = path: type:
+                    let
+                      name = lib.baseNameOf path;
+                    in
+                      !(builtins.elem name [ "flake.nix" "flake.lock" "README.md" ])
+                      && lib.cleanSourceFilter path type;
+                };
+
+                version = "1.0.0";
+
                 frontend = pkgs.buildNpmPackage {
                   pname = "avogadrio-frontend";
-                  version = "1.0.0";
-                  src = lib.sources.cleanSource ./.;
+                  inherit src version;
 
                   npmDepsHash = "sha256-Vsd0VCB2h5g6Dhi1rXyTdRLDDQfTdEm7i3DHPjkVGI0=";
 
@@ -43,21 +85,39 @@
                     cp -r web/css web/js $out/
                   '';
                 };
+
+                php = pkgs.php.withExtensions({ all, ... }: with all; [
+                  # Composer:
+                  ctype
+                  filter
+                  iconv
+                  openssl
+                  zlib
+                  # Avogadrio:
+                  # ctype
+                  fileinfo
+                  # filter
+                  gd
+                  # openssl
+                ]);
               in
-              pkgs.php.buildComposerProject2 (finalAttrs: {
+              php.buildComposerProject2 (finalAttrs: {
                 pname = "avogadrio";
-                version = "1.0.0";
 
-                inherit frontend;
+                inherit frontend src version;
 
-                src = lib.sources.cleanSource ./.;
                 vendorHash = "sha256-Km9xynFgQ0EaYsCk1V/1MplR84RNeT9ceNhtRtwOzO4=";
+
+                nativeBuildInputs = [ pkgs.makeWrapper ];
 
                 postInstall = ''
                   cp -r ${frontend}/js ${frontend}/css $out/share/php/avogadrio/web/
                   substituteInPlace $out/share/php/avogadrio/vendor/twig/twig/lib/Twig/Node.php \
                     --replace-fail "is_object(\$node) ? get_class(\$node) : null === \$node ? 'null' : gettype(\$node)" \
                     "is_object(\$node) ? get_class(\$node) : (null === \$node ? 'null' : gettype(\$node))"
+
+                  makeWrapper ${lib.getExe php} $out/bin/avogadrio \
+                  --add-flags "-t $out/share/php/avogadrio/web"
                 '';
               });
 
@@ -91,6 +151,35 @@
                     ];
                   };
                 };
+
+                java = pkgs.jre_headless;
+
+                runtime = pkgs.runCommand "java-sourire" {
+                  nativeBuildInputs = [
+                    java
+                    pkgs.binutils
+                    pkgs.patchelf
+                  ];
+                  disallowedReferences = [ java ];
+                  meta.mainProgram = "java";
+                } ''
+                  jlink --module-path "${java}/lib/openjdk/jmods" \
+                    --add-modules java.base,java.sql,jdk.unsupported \
+                    --strip-debug \
+                    --no-man-pages \
+                    --no-header-files \
+                    --output=$out
+
+                  # This loop was courtesy of ChatGPT
+                  # jlink copies the Nix-patched ELF files from the input JDK.
+                  # Add paths relative to the new image, then discard obsolete
+                  # RPATH entries such as $openjdk/lib/openjdk/lib.
+                  while IFS= read -r -d "" file; do
+                    rpath="$(patchelf --print-rpath "$file" 2>/dev/null)" || continue
+                    patchelf --set-rpath "$rpath:\$ORIGIN:\$ORIGIN/..:\$ORIGIN/../lib" "$file"
+                    patchelf --shrink-rpath "$file"
+                  done < <(find "$out" -type f -print0)
+                '';
               in
               pkgs.stdenvNoCC.mkDerivation {
                 name = "sourire";
@@ -113,8 +202,14 @@
                 installPhase = ''
                   mkdir -p $out
                   cp target/sourire-0.1.0-SNAPSHOT-standalone.jar $out/sourire.jar
-                  makeWrapper ${pkgs.openjdk}/bin/java $out/bin/sourire \
-                    --add-flags "-jar $out/sourire.jar"
+                  makeWrapper ${lib.getExe runtime} $out/bin/sourire \
+                    --add-flags "-jar $out/sourire.jar" \
+                    --prefix LD_LIBRARY_PATH : ${
+                      pkgs.lib.makeLibraryPath [
+                        pkgs.freetype
+                        pkgs.fontconfig
+                      ]
+                    }
                 '';
               };
           };
