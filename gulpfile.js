@@ -1,23 +1,20 @@
-// Promise polyfill.
-var Promise = require('es6-promise').Promise;
+import Promise from 'es6-promise';
 
-// Gulp itself.
-var gulp = require('gulp');
+import gulp from 'gulp';
 
-// Less and CSS stuff.
-var less = require('gulp-less');
-var prefix = require('gulp-autoprefixer');
-var minifycss = require('gulp-minify-css');
-var coffee = require('gulp-coffee');
+import less from 'gulp-less';
+import cleanCSS from 'gulp-clean-css';
+import autoprefixer from 'gulp-autoprefixer';
+import coffee from 'gulp-coffee';
 
 // Compile all the Less.
 gulp.task('less', function () {
     return gulp.src(['./src/less/*.less'])
         .pipe(less())
-        .pipe(prefix(
+        .pipe(autoprefixer(
             "last 1 version", "> 1%", "ie 8", "ie 7"
         ))
-        .pipe(minifycss()) // Minify resulting CSS.
+        .pipe(cleanCSS({compatibility: 'ie8'})) // Minify resulting CSS.
         .pipe(gulp.dest('./web/css'));
 });
 

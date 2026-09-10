@@ -7,7 +7,6 @@ minimal modifications. I have a few QoL things I'd like to support as well.
 - [ ] Molecule size should be customizeable (Vitamin B12 doesn't render, I think it's too large)
 - [ ] Find modern alternative to sourire (molecule rendering is a bit odd compared to Wikipedia)
 - [ ] Replace external references to bootstrap, etc in templates/index.twig.html with npm installed jquery
-- [ ] Update all deps in npm
 
 # Avogadrio
 Worship your favorite molecule by setting it as your wallpaper.

@@ -30,8 +30,7 @@
                   version = "1.0.0";
                   src = lib.sources.cleanSource ./.;
 
-                  npmDepsHash = "sha256-fkygUUgP5A7735m4yu2yF1ZFsscxkVFK3yuj2+7DN7s=";
-                  nodejs = pkgs.nodejs_22;
+                  npmDepsHash = "sha256-Vsd0VCB2h5g6Dhi1rXyTdRLDDQfTdEm7i3DHPjkVGI0=";
 
                   buildPhase = ''
                     runHook preBuild
@@ -48,6 +47,8 @@
               pkgs.php.buildComposerProject2 (finalAttrs: {
                 pname = "avogadrio";
                 version = "1.0.0";
+
+                inherit frontend;
 
                 src = lib.sources.cleanSource ./.;
                 vendorHash = "sha256-Km9xynFgQ0EaYsCk1V/1MplR84RNeT9ceNhtRtwOzO4=";
@@ -122,6 +123,7 @@
             inputsFrom = [
               self'.packages.sourire
               self'.packages.avogadrio
+              self'.packages.avogadrio.frontend
             ];
             packages = [ self'.packages.sourire.locker ];
           };
