@@ -72,7 +72,7 @@
                   pname = "avogadrio-frontend";
                   inherit src version;
 
-                  npmDepsHash = "sha256-ECiOOrW2Qpy2oYtKZ74OjGC1DK/HJ2Mb9V59uKLcLpk=";
+                  npmDepsHash = "sha256-e3oLRuvaVN70uzfzJuPI9nlKcMD5o5W2yElLw0k+M+k=";
 
                   buildPhase = ''
                     runHook preBuild
@@ -82,7 +82,10 @@
 
                   installPhase = ''
                     mkdir -p $out
-                    cp -r web/css web/js $out/
+                    cp -r web/css web/js node_modules/jquery \
+                      node_modules/bootstrap node_modules/spectrum-colorpicker \
+                      node_modules/animate.css node_modules/font-awesome \
+                      node_modules/flat-ui $out/
                   '';
                 };
 
@@ -111,7 +114,10 @@
                 nativeBuildInputs = [ pkgs.makeWrapper ];
 
                 postInstall = ''
-                  cp -r ${frontend}/js ${frontend}/css $out/share/php/avogadrio/web/
+                  cp -r ${frontend}/js ${frontend}/css ${frontend}/jquery \
+                    ${frontend}/bootstrap ${frontend}/spectrum-colorpicker \
+                    ${frontend}/animate.css ${frontend}/font-awesome \
+                    ${frontend}/flat-ui $out/share/php/avogadrio/web/
                   substituteInPlace $out/share/php/avogadrio/vendor/twig/twig/lib/Twig/Node.php \
                     --replace-fail "is_object(\$node) ? get_class(\$node) : null === \$node ? 'null' : gettype(\$node)" \
                     "is_object(\$node) ? get_class(\$node) : (null === \$node ? 'null' : gettype(\$node))"

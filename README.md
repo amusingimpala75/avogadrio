@@ -2,14 +2,17 @@ Seeing as the website is down last I checked I figured I try running this locall
 so I added nix packaging scripts for both this and sourire which this requires, with
 minimal modifications. I have a few QoL things I'd like to support as well.
 
+### Planned Additions
 - [ ] Should be able to customize the resolution instead of defaulting to 1920x1080
-- [ ] Clean up and modernize the code so the deprecation warnings are gone
 - [ ] Molecule size should be customizeable
-- [ ] Find modern alternative to sourire (molecule rendering is a bit odd compared to Wikipedia)
-- [ ] Replace external references to bootstrap, etc in templates/index.twig.html with npm installed jquery
 - [ ] Searchable dropdown for the compounds
+### Chores
 - [ ] Move away from gulp.js?
+- [ ] Find modern alternative to sourire (molecule rendering is a bit odd compared to Wikipedia)
+- [ ] Clean up and modernize the code so the deprecation warnings are gone
+### Maintenance
 - [ ] Update PHP deps
+- [ ] Update npm deps (again, resolve bootstrap vuln)
 
 # Avogadrio
 Worship your favorite molecule by setting it as your wallpaper.
