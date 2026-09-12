@@ -53,13 +53,7 @@ Then, install the npm packages necessary to build and run the website. Run the f
 npm install
 ```
 
-This will install [Bower](https://bower.io/) which will allow you to install the assets the website requires (Bootstrap, jQuery etc.) using the command:
-
-```
-bower install
-```
-
-Gulp will also have been installed. This will compile the [Less](http://lesscss.org/) and [CoffeeScript](http://coffeescript.org/) into CSS and JavaScript ready for production. Do this using the command:
+Gulp will have been installed. This will compile the [Less](http://lesscss.org/) and [CoffeeScript](http://coffeescript.org/) into CSS and JavaScript ready for production. Do this using the command:
 
 ```
 gulp

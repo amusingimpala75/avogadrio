@@ -72,7 +72,7 @@
                   pname = "avogadrio-frontend";
                   inherit src version;
 
-                  npmDepsHash = "sha256-Vsd0VCB2h5g6Dhi1rXyTdRLDDQfTdEm7i3DHPjkVGI0=";
+                  npmDepsHash = "sha256-ECiOOrW2Qpy2oYtKZ74OjGC1DK/HJ2Mb9V59uKLcLpk=";
 
                   buildPhase = ''
                     runHook preBuild
