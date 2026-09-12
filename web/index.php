@@ -1,11 +1,6 @@
 <?php
 
-// Send diagnostic output to the PHP server's stderr while debugging. Do not emit
-// it in HTTP responses, since this application serves PNGs from API endpoints.
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
-ini_set('display_errors', '0');
-ini_set('log_errors', '1');
-ini_set('error_log', 'php://stderr');
 
 require_once __DIR__ . '/../vendor/autoload.php';
 

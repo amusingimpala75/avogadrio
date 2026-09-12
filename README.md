@@ -8,6 +8,8 @@ minimal modifications. I have a few QoL things I'd like to support as well.
 - [ ] Find modern alternative to sourire (molecule rendering is a bit odd compared to Wikipedia)
 - [ ] Replace external references to bootstrap, etc in templates/index.twig.html with npm installed jquery
 - [ ] Searchable dropdown for the compounds
+- [ ] Move away from gulp.js?
+- [ ] Update PHP deps
 
 # Avogadrio
 Worship your favorite molecule by setting it as your wallpaper.
@@ -30,10 +32,9 @@ A couple of files need changing to get the site working for you.
 
 1. Copy `config/config.yaml.dist` and rename it to `config.yaml`. Fill in the fields according to their descriptions and save.
 2. For `sourire_service` you'll want to point it to your local [Sourire](https://github.com/tmoerman/sourire) server. For example `http://localhost:8080/`.
-3. Create files at `templates/_analytics.html.twig` for your analytics code and `templates/_donations.html.twig` for any donation buttons. Leave them blank if you like, but you must create them.
 
 ## Building
-Clone the project down and open the folder in your favourite editor. It's a JetBrains PhpStorm project but you can use whichever paid/free software takes your fancy.
+Clone the project down and open the folder in your favourite editor.
 
 Before anything else, note that this project uses the [Composer](https://getcomposer.org/) package manager. Install composer (see their website) and run:
 
