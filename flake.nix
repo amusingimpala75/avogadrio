@@ -36,7 +36,7 @@
             };
 
             container = inputs.nix2container.packages.${pkgs.stdenv.hostPlatform.system}.nix2container.buildImage {
-              name = "ghrc.io/amusingimpala75/avogadrio";
+              name = "ghcr.io/amusingimpala75/avogadrio";
               tag = "latest";
 
               config = {
