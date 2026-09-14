@@ -36,18 +36,13 @@
             };
 
             container = inputs.nix2container.packages.${pkgs.stdenv.hostPlatform.system}.nix2container.buildImage {
-              name = "avogadrio";
-              copyToRoot = [
-                (pkgs.runCommand "avogadrio-config" { } ''
-                  mkdir -p $out/etc/avogadrio
-                  cp ${./config/config.yaml.dist} $out/etc/avogadrio/config.yaml
-                '')
-              ];
+              name = "ghrc.io/amusingimpala75/avogadrio";
+              tag = "latest";
+
               config = {
                 entrypoint = [ "${lib.getExe self'.packages.default}" ];
                 env = [ "XDG_CACHE_HOME=/tmp" ];
               };
-              tag = "latest";
             };
 
             avogadrio =
