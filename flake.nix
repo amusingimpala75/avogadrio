@@ -117,8 +117,8 @@
                   cp ${./config/config.yaml.dist} $out/etc/avogadrio/config.yaml
 
                   makeWrapper ${lib.getExe php} $out/bin/avogadrio \
-                  --add-flags "-t $out/share/php/avogadrio/web" \
-                  --set-default "$out/etc/avogadrio/config.yaml"
+                    --add-flags "-t $out/share/php/avogadrio/web" \
+                    --set-default AVOGADRIO_CONFIG "$out/etc/avogadrio/config.yaml"
                 '';
               });
 
