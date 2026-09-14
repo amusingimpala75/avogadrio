@@ -26,7 +26,7 @@
             default = pkgs.writeShellApplication {
               name = "avogadrio-sourire";
               text = ''
-                avogadrio -S 0.0.0.0:${PORT:-8080} &
+                avogadrio -S 0.0.0.0:''${PORT:-8080} &
                 sourire :port 8081
               '';
               runtimeInputs = [
