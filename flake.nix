@@ -26,7 +26,6 @@
             default = pkgs.writeShellApplication {
               name = "avogadrio-sourire";
               text = ''
-                export AVOGADRIO_CONFIG=''${AVOGADRIO_CONFIG:-${./config/config.yaml.dist}}
                 avogadrio -S 0.0.0.0:8080 &
                 sourire :port 8081
               '';
@@ -46,10 +45,7 @@
               ];
               config = {
                 entrypoint = [ "${lib.getExe self'.packages.default}" ];
-                env = [
-                  "AVOGADRIO_CONFIG=/etc/avogadrio/config.yaml"
-                  "XDG_CACHE_HOME=/tmp"
-                ];
+                env = [ "XDG_CACHE_HOME=/tmp" ];
               };
               tag = "latest";
             };
@@ -122,8 +118,12 @@
                     --replace-fail "is_object(\$node) ? get_class(\$node) : null === \$node ? 'null' : gettype(\$node)" \
                     "is_object(\$node) ? get_class(\$node) : (null === \$node ? 'null' : gettype(\$node))"
 
+                  mkdir -p $out/etc/avogadrio
+                  cp ${./config/config.yaml.dist} $out/etc/avogadrio/config.yaml
+
                   makeWrapper ${lib.getExe php} $out/bin/avogadrio \
-                  --add-flags "-t $out/share/php/avogadrio/web"
+                  --add-flags "-t $out/share/php/avogadrio/web" \
+                  --set-default "$out/etc/avogadrio/config.yaml"
                 '';
               });
 
