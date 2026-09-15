@@ -100,7 +100,7 @@
 
                 inherit frontend src version;
 
-                vendorHash = "sha256-Km9xynFgQ0EaYsCk1V/1MplR84RNeT9ceNhtRtwOzO4=";
+                vendorHash = "sha256-rLhGkhiV5EqrGFmACytRNNqpEFmcLxQg2XPW3QO2ww8=";
 
                 nativeBuildInputs = [ pkgs.makeWrapper ];
 
@@ -109,9 +109,6 @@
                     ${frontend}/bootstrap ${frontend}/spectrum-colorpicker \
                     ${frontend}/animate.css ${frontend}/font-awesome \
                     ${frontend}/flat-ui $out/share/php/avogadrio/web/
-                  substituteInPlace $out/share/php/avogadrio/vendor/twig/twig/lib/Twig/Node.php \
-                    --replace-fail "is_object(\$node) ? get_class(\$node) : null === \$node ? 'null' : gettype(\$node)" \
-                    "is_object(\$node) ? get_class(\$node) : (null === \$node ? 'null' : gettype(\$node))"
 
                   mkdir -p $out/etc/avogadrio
                   cp ${./config/config.yaml.dist} $out/etc/avogadrio/config.yaml

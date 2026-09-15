@@ -33,12 +33,6 @@ $moleculeRenderer = new MoleculeRenderer($config['sourire_service']);
 
 $moleculeRenderer->setRenderChiralLabels(false); // Disable chiral labels.
 
-// Twig initialization.
-$loader = new Twig_Loader_Filesystem(__DIR__.'/../templates');
-$twig = new Twig_Environment($loader, array(
-    'cache' => false //__DIR__.'/../cache',
-));
-
 /*
  * Route actions.
  */
@@ -46,8 +40,8 @@ $twig = new Twig_Environment($loader, array(
 /**
  * Action for frontend route.
  */
-$app->get('/', function () use ($twig, $config) {
-    return $twig->render('index.html.twig', $config);
+$app->get('/', function () use ($config) {
+    return file_get_contents(__DIR__.'/index.html');
 });
 
 /**

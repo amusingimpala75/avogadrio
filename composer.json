@@ -11,7 +11,6 @@
     ],
     "require": {
         "silex/silex": "~2.0",
-        "twig/twig": "^1.24",
         "mustangostang/spyc": "^0.5.1",
         "intervention/image": "^2.4",
         "guzzlehttp/guzzle": "^6.3",
