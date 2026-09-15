@@ -60,7 +60,8 @@ $(document).ready ->
   # @param [name] name          the compound name
   #
   buildUrl = (width, height, foreground, background, name) ->
-    url = "/api/name/#{width}/#{height}/#{background}/#{foreground}/#{name}"
+    smiles = await moleculeName name
+    url = "/api/smiles/#{width}/#{height}/#{background}/#{foreground}/#{smiles}"
     qs = ""
     if customLabel != '' then qs += "label=#{customLabel}"
     if qs != '' then qs += "&"
@@ -75,7 +76,8 @@ $(document).ready ->
   # @param [name] name          the compound name
   #
   buildMoleculeOnlyUrl = (width, height, foreground, name) ->
-    url = "/api/name/#{width}/#{height}/#{foreground}/#{name}"
+    smiles = await moleculeName name
+    url = "/api/smiles/#{width}/#{height}/#{foreground}/#{smiles}"
     qs = ""
     if customLabel != '' then qs += "label=#{customLabel}"
     if qs != '' then qs += "&"
@@ -118,25 +120,38 @@ $(document).ready ->
   # @param [string] name      the compound name
   #
   checkMoleculeName = (name) ->
-    return await checkCactusMoleculeName name || await checkWikipediaMoleculeName name
+    return (await moleculeName name) != null
 
-  # Checks if a compound name is in the Cactus SMILES database
+  # Gets a compound SMILES if its name is found in configured databases.
   #
   # @param [string] name      the compound name
   #
-  checkCactusMoleculeName = (name) ->
+  moleculeName = (name) ->
+    cactus = await cactusMoleculeName name
+    if cactus != null
+      return cactus
+    return await wikipediaMoleculeName name
+
+  # Gets a compound SMILES if its name is in the Cactus SMILES database, else null
+  #
+  # @param [string] name      the compound name
+  #
+  cactusMoleculeName = (name) ->
     uri = "https://cactus.nci.nih.gov/chemical/structure/#{encodeURIComponent(name)}/smiles"
     try
       data = await $.get(uri)
-      return checkSmiles data
+      if checkSmiles data
+        return data
+      else
+        return null
     catch error
-      return false
+      return null
 
-  # Checks if a compound name is in Wikipedia
+  # Gets a compound SMILES from its name if it is in Wikipedia, else null
   #
   # @param [string] name      the compound name
   #
-  checkWikipediaMoleculeName = (name) ->
+  wikipediaMoleculeName = (name) ->
     uri = "https://en.wikipedia.org/wiki/#{encodeURIComponent(name)}"
     try
       data = await $.get(uri)
@@ -145,10 +160,10 @@ $(document).ready ->
         if a.textContent.includes('SMILES')
           smiles = a.parentElement.nextElementSibling?.textContent.trim()
           if checkSmiles smiles
-            return true
-      return false
+            return smiles
+      return null
     catch error
-      return false
+      return null
 
   # Checks if a string is a valid SMILES structure.
   #

@@ -39,10 +39,7 @@
               name = "ghcr.io/amusingimpala75/avogadrio";
               tag = "latest";
 
-              config = {
-                entrypoint = [ "${lib.getExe self'.packages.default}" ];
-                env = [ "XDG_CACHE_HOME=/tmp" ];
-              };
+              config.entrypoint = [ "${lib.getExe self'.packages.default}" ];
             };
 
             avogadrio =
@@ -100,7 +97,7 @@
 
                 inherit frontend src version;
 
-                vendorHash = "sha256-rLhGkhiV5EqrGFmACytRNNqpEFmcLxQg2XPW3QO2ww8=";
+                vendorHash = "sha256-DA8hD0f/JM6e61EMZId6uBIsbRTiPkRHz9z0CGVAWlQ=";
 
                 nativeBuildInputs = [ pkgs.makeWrapper ];
 
