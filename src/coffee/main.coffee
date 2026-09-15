@@ -53,6 +53,8 @@ $(document).ready ->
 
   # Builds a URL to generate a wallpaper image from a compound name.
   #
+  # This function is now async
+  #
   # @param [int] width          the width of the image
   # @param [int] height         the height of the image
   # @param [string] foreground  the molecule color (hex, without `#`)
@@ -69,6 +71,8 @@ $(document).ready ->
     return if qs == "" then url else url + "?" + qs
 
   # Builds a URL to generate a molecule-only image from a compound name.
+  #
+  # This function is now async
   #
   # @param [int] width          the width of the image if it were rendered as a wallpaper
   # @param [int] height         the height of the image if it were rendered as a wallpaper
@@ -196,7 +200,7 @@ $(document).ready ->
   # Updates the download link according to the currently displayed molecule.
   #
   updateDownloadLink = ->
-    url = buildUrl screenWidth, screenHeight, foregroundColor, backgroundColor, currentCompoundName
+    url = await buildUrl screenWidth, screenHeight, foregroundColor, backgroundColor, currentCompoundName
     if smilesMode
       url = buildSmilesUrl screenWidth, screenHeight, foregroundColor, backgroundColor, currentCompoundSmiles
     downloadButton.attr 'download', if smilesMode then 'smiles_molecule' else currentCompoundName
@@ -236,7 +240,7 @@ $(document).ready ->
   refreshPreviewCompoundName = ->
     currentCompoundName = getCompoundName()
     smilesMode = false
-    url = buildMoleculeOnlyUrl screenWidth, screenHeight, foregroundColor, currentCompoundName, rotation
+    url = await buildMoleculeOnlyUrl screenWidth, screenHeight, foregroundColor, currentCompoundName, rotation
     updatePreview previewElement, url, backgroundColor, rotation
 
   # Refreshes the preview using the SMILES structure text box.
