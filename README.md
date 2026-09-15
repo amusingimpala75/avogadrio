@@ -9,6 +9,8 @@ minimal modifications. I have a few QoL things I'd like to support as well.
 ### Chores
 - [ ] Move away from gulp.js?
 - [ ] Find modern alternative to sourire (molecule rendering is a bit odd compared to Wikipedia)
+- [ ] Move name->SMILES conversion into frontend
+- [ ] Remove backend once no longer needed
 - [ ] Clean up and modernize the code so the deprecation warnings are gone
 ### Maintenance
 - [ ] Update PHP deps

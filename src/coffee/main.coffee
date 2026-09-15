@@ -116,22 +116,47 @@ $(document).ready ->
   # Checks if a compound name can be converted to SMILES using the configured database.
   #
   # @param [string] name      the compound name
-  # @param [function] success the success callback
-  # @param [function] fail    the failure callback
   #
-  checkMoleculeName = (name, success, fail) ->
-    $.get "/api/name/exists/#{name}", (data) ->
-      if data then success() else fail()
+  checkMoleculeName = (name) ->
+    return await checkCactusMoleculeName name || await checkWikipediaMoleculeName name
+
+  # Checks if a compound name is in the Cactus SMILES database
+  #
+  # @param [string] name      the compound name
+  #
+  checkCactusMoleculeName = (name) ->
+    uri = "https://cactus.nci.nih.gov/chemical/structure/#{encodeURIComponent(name)}/smiles"
+    try
+      data = await $.get(uri)
+      return checkSmiles data
+    catch error
+      return false
+
+  # Checks if a compound name is in Wikipedia
+  #
+  # @param [string] name      the compound name
+  #
+  checkWikipediaMoleculeName = (name) ->
+    uri = "https://en.wikipedia.org/wiki/#{encodeURIComponent(name)}"
+    try
+      data = await $.get(uri)
+      doc = new DOMParser().parseFromString(data, 'text/html')
+      for a in doc.querySelectAll('a')
+        if a.textContent.includes('SMILES')
+          smiles = a.parentElement.nextElementSibling?.textContent.trim()
+          if checkSmiles smiles
+            return true
+      return false
+    catch error
+      return false
 
   # Checks if a string is a valid SMILES structure.
   #
   # @param [string] name      the compound name
-  # @param [function] success the success callback
-  # @param [function] fail    the failure callback
   #
-  checkSmiles = (smiles, success, fail) ->
+  checkSmiles = (smiles) ->
     regex = /^([^J][a-z0-9@+\.\-\[\]\(\)\\\/%=#$]{0,})$/ig
-    if regex.test smiles then success() else fail()
+    return regex.test smiles
 
   # Checks if a string is a valid hex color.
   #
@@ -267,12 +292,18 @@ $(document).ready ->
 
   $('.update-btn').on 'click', (e) ->
     errorRows.hide()
-    checkMoleculeName getCompoundName(), refreshPreviewCompoundName, failPreview
+    if await checkMoleculeName getCompoundName()
+      refreshPreviewCompoundName()
+    else
+      failPreview()
 
   $('.update-smiles-btn').on 'click', (e) ->
     smilesMode = true
     errorRows.hide()
-    checkSmiles getCompoundSmiles(), refreshPreviewSmiles, failPreviewSmiles
+    if checkSmiles getCompoundSmiles()
+      refreshPreviewSmiles()
+    else
+      failPreviewSmiles()
 
   # Label update button should also refresh preview.
 

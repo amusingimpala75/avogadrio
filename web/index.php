@@ -140,14 +140,4 @@ $app->get('/api/name/{width}/{height}/{color}/{name}',
         return $app->abort(404, "Chemical name could not be converted to SMILES.");
 });
 
-/**
- * Action for checking if compound name exists.
- */
-$app->get('/api/name/exists/{name}',
-    function ($name) use ($config, $smilesConverter) {
-
-        // Return JSON response (just a lone boolean).
-        return new JsonResponse($smilesConverter->nameToSmiles($name) === null ? false : true);
-});
-
 $app->run();
