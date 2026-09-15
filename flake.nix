@@ -80,6 +80,7 @@
                 php = pkgs.php.withExtensions({ all, ... }: with all; [
                   # Composer:
                   ctype
+                  curl
                   filter
                   iconv
                   openssl
@@ -89,6 +90,7 @@
                   fileinfo
                   # filter
                   gd
+                  mbstring
                   # openssl
                 ]);
               in

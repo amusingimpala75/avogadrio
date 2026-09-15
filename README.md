@@ -11,6 +11,7 @@ minimal modifications. I have a few QoL things I'd like to support as well.
 - [ ] Find modern alternative to sourire (molecule rendering is a bit odd compared to Wikipedia)
 - [ ] Remove backend once no longer needed
 - [ ] Clean up and modernize the code so the deprecation warnings are gone
+- [ ] Fix cyanide [C-#N] rendered as [C-]
 ### Maintenance
 - [ ] Update PHP deps
 - [ ] Update npm deps (again, resolve bootstrap vuln)
