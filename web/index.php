@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+use Intervention\Image\Format;
+
 use Avogadrio\MoleculeRenderer;
 
 $app = new Silex\Application();
@@ -37,7 +39,7 @@ $app->get('/', function () use ($config) {
 /**
  * Action for SMILES wallpaper route.
  */
-$app->get('/api/smiles/{width}/{height}/{background}/{foreground}/{smiles}',
+$app->get('/api/smiles/wallpaper/{width}/{height}/{background}/{foreground}/{smiles}',
     function (Request $request, $width, $height, $background, $foreground, $smiles) use ($moleculeRenderer) {
 
         // Add label.
@@ -50,14 +52,14 @@ $app->get('/api/smiles/{width}/{height}/{background}/{foreground}/{smiles}',
         $image = $moleculeRenderer->renderMoleculeWithBackground($smiles, $foreground, $background, $width, $height);
 
         // Return image to client.
-        return new Response($image->response('png'), 200, ['Content-Type' => 'image/png']);
+        return new Response((string) $image->encodeUsingFormat(Format::PNG), 200, ['Content-Type' => 'image/png']);
 });
 
 /**
  * Action for molecule-only SMILES route.
  */
-$app->get('/api/smiles/{width}/{height}/{color}/{smiles}',
-    function (Request $request, $width, $height, $color, $smiles) use ($moleculeRenderer) {
+$app->get('/api/smiles/molecule/{width}/{height}/{background}/{foreground}/{smiles}',
+    function (Request $request, $width, $height, $background, $foreground, $smiles) use ($moleculeRenderer) {
 
         // Add label.
         $moleculeRenderer->setCustomLabel($request->get('label'));
@@ -66,10 +68,10 @@ $app->get('/api/smiles/{width}/{height}/{color}/{smiles}',
         $moleculeRenderer->setRotation((float) $request->get('rotation'));
 
         // Render molecule only.
-        $image = $moleculeRenderer->renderScaledMolecule($smiles, $color, $width, $height);
+        $image = $moleculeRenderer->renderScaledMolecule($smiles, $foreground, $background, $width, $height);
 
         // Return image to client.
-        return new Response($image->response('png'), 200, ['Content-Type' => 'image/png']);
+        return new Response((string) $image->encodeUsingFormat(Format::PNG), 200, ['Content-Type' => 'image/png']);
 });
 
 $app->run();

@@ -99,7 +99,7 @@
 
                 inherit frontend src version;
 
-                vendorHash = "sha256-DA8hD0f/JM6e61EMZId6uBIsbRTiPkRHz9z0CGVAWlQ=";
+                vendorHash = "sha256-BL6/JpBhxBBhLGW8ZBhdIZQqUVby3nDnEbcG1aUV9cM=";
 
                 nativeBuildInputs = [ pkgs.makeWrapper ];
 

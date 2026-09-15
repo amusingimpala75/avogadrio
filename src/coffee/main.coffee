@@ -63,7 +63,7 @@ $(document).ready ->
   #
   buildUrl = (width, height, foreground, background, name) ->
     smiles = await moleculeName name
-    url = "/api/smiles/#{width}/#{height}/#{background}/#{foreground}/#{smiles}"
+    url = "/api/smiles/wallpaper/#{width}/#{height}/#{background}/#{foreground}/#{smiles}"
     qs = ""
     if customLabel != '' then qs += "label=#{customLabel}"
     if qs != '' then qs += "&"
@@ -79,9 +79,9 @@ $(document).ready ->
   # @param [string] foreground  the molecule color (hex, without `#`)
   # @param [name] name          the compound name
   #
-  buildMoleculeOnlyUrl = (width, height, foreground, name) ->
+  buildMoleculeOnlyUrl = (width, height, background, foreground, name) ->
     smiles = await moleculeName name
-    url = "/api/smiles/#{width}/#{height}/#{foreground}/#{smiles}"
+    url = "/api/smiles/molecule/#{width}/#{height}/#{background}/#{foreground}/#{smiles}"
     qs = ""
     if customLabel != '' then qs += "label=#{customLabel}"
     if qs != '' then qs += "&"
@@ -240,7 +240,7 @@ $(document).ready ->
   refreshPreviewCompoundName = ->
     currentCompoundName = getCompoundName()
     smilesMode = false
-    url = await buildMoleculeOnlyUrl screenWidth, screenHeight, foregroundColor, currentCompoundName, rotation
+    url = await buildMoleculeOnlyUrl screenWidth, screenHeight, backgroundColor, foregroundColor, currentCompoundName, rotation
     updatePreview previewElement, url, backgroundColor, rotation
 
   # Refreshes the preview using the SMILES structure text box.

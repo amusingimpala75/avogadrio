@@ -2,7 +2,9 @@
 
 namespace Avogadrio;
 
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Alignment;
 
 /**
  * Provides a molecule rendering service via a Sourire installation.
@@ -13,6 +15,8 @@ use Intervention\Image\ImageManagerStatic as Image;
  */
 class MoleculeRenderer
 {
+    private $manager;
+
     private $sourireUrl;
 
     private $renderChiralLabels;
@@ -35,7 +39,7 @@ class MoleculeRenderer
         }
 
         // Configure GD as image driver.
-        Image::configure(array('driver' => 'gd'));
+        $this->manager = ImageManager::usingDriver(Driver::class);
 
         // Set some defaults.
         $this->renderChiralLabels = true;
@@ -47,22 +51,30 @@ class MoleculeRenderer
      *
      * @param string $smiles    the SMILES structure of the molecule to render
      * @param string $color     the color to render the molecule in (as a hex string without `#`)
+     * @param string $background the background color of the image
      * @return \Intervention\Image\Image
      */
-    public function renderMolecule($smiles, $color)
+    public function renderMolecule($smiles, $color, $background)
     {
-        // Proxy into Sourire for molecule render.
-        $img = Image::make($this->sourireUrl
+        $url = $this->sourireUrl
             . 'molecule/' . rawurlencode($smiles)
             . '?render-stereo-style=' . ($this->renderChiralLabels ? 'old' : 'none') // Label chiral atoms?
             . '&render-comment-offset=16' // Give some space between label and molecule.
-            . ($this->customLabel === '' ? '' : ('&render-comment=' . rawurlencode($this->customLabel))));
+            . ($this->customLabel === '' ? '' : ('&render-comment=' . rawurlencode($this->customLabel)));
+
+        $data = file_get_contents($url);
+        if ($data == false) {
+            throw new RuntimeException("Unable to fetch image: $url");
+        }
+
+        // Proxy into Sourire for molecule render.
+        $img = $this->manager->decodeBinary($data);
 
         // Colorize molecule.
         list($r, $g, $b) = sscanf($color, "%02x%02x%02x");
         $unit = 100 / 255;
         $img->colorize($unit * $r, $unit * $g, $unit * $b);
-        $img->rotate($this->rotation);
+        $img->rotate($this->rotation, $background);
 
         return $img; // Return molecule image.
     }
@@ -72,31 +84,32 @@ class MoleculeRenderer
      *
      * @param string $smiles    the SMILES structure of the molecule to render
      * @param string $color     the color to render the molecule in (as a hex string without `#`)
+     * @param string $background the background color of the image
      * @param int $canvasWidth  the width of the canvas to scale the molecule to
      * @param int $canvasHeight the height of the canvas to scale the molecule to
      * @param float $proportion the maximum proportion of the canvas the molecule should occupy (in either direction)
      * @param float $rotation  the angle to rotate the image by
      * @return \Intervention\Image\Image
      */
-    public function renderScaledMolecule($smiles, $color, $canvasWidth, $canvasHeight, $proportion = 0.8)
+    public function renderScaledMolecule($smiles, $color, $background, $canvasWidth, $canvasHeight, $proportion = 0.8)
     {
         // Render molecule at normal size.
-        $img = $this->renderMolecule($smiles, $color);
+        $img = $this->renderMolecule($smiles, $color, $background);
 
         // Calculate proportions of canvas width.
-        $px = $img->getWidth() / $canvasWidth;
-        $py = $img->getHeight() / $canvasHeight;
+        $px = $img->width() / $canvasWidth;
+        $py = $img->height() / $canvasHeight;
 
         // Resize in both directions to fit.
         while ($px > $proportion || $py > $proportion) {
             if ($px > $proportion) {
-                $factor = ($canvasWidth * $proportion) / $img->getWidth();
+                $factor = ($canvasWidth * $proportion) / $img->width();
             } else {
-                $factor = ($canvasHeight * $proportion) / $img->getHeight();
+                $factor = ($canvasHeight * $proportion) / $img->height();
             }
-            $img->resize($img->getWidth() * $factor, $img->getHeight() * $factor);
-            $px = $img->getWidth() / $canvasWidth;
-            $py = $img->getHeight() / $canvasHeight;
+            $img->resize($img->width() * $factor, $img->height() * $factor);
+            $px = $img->width() / $canvasWidth;
+            $py = $img->height() / $canvasHeight;
         }
 
         return $img;
@@ -115,13 +128,13 @@ class MoleculeRenderer
     public function renderMoleculeWithBackground($smiles, $foreground, $background, $width, $height)
     {
         // Set up background.
-        $img = Image::canvas($width, $height, "#$background");
+        $img = $this->manager->createImage($width, $height)->fill("#$background");
 
         // Render scaled molecule.
-        $molecule = $this->renderScaledMolecule($smiles, $foreground, $width, $height);
+        $molecule = $this->renderScaledMolecule($smiles, $foreground, $background, $width, $height);
 
         // Center on background.
-        $img->insert($molecule, 'center');
+        $img->insert($molecule, alignment: Alignment::CENTER);
 
         return $img;
     }
