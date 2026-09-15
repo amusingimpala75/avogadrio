@@ -7,14 +7,14 @@ minimal modifications. I have a few QoL things I'd like to support as well.
 - [ ] Molecule size should be customizeable
 - [ ] Searchable dropdown for the compounds
 ### Chores
-- [ ] Move away from gulp.js?
-- [ ] Find modern alternative to sourire (molecule rendering is a bit odd compared to Wikipedia)
+- [ ] Move away from `gulp.js`?
+- [ ] Find modern alternative to `sourire` (molecule rendering is a bit odd compared to Wikipedia)
+      - Perhaps `rdkit.js` or `smiles-drawer`
 - [ ] Remove backend once no longer needed
 - [ ] Clean up and modernize the code so the deprecation warnings are gone
 - [ ] Fix cyanide [C-#N] rendered as [C-]
-### Maintenance
-- [ ] Update PHP deps
-- [ ] Update npm deps (again, resolve bootstrap vuln)
+- [ ] Replace `spectrum-colorpicker` with something more modern (so we can update `jquery`)
+- [ ] Migrate Silex -> symfony/flex (unless we ditch the backend altogether)
 
 # Avogadrio
 Worship your favorite molecule by setting it as your wallpaper.
