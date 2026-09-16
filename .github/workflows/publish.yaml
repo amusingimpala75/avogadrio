@@ -19,7 +19,7 @@ jobs:
     - id: upload
       uses: actions/upload-pages-artifact@v3
       with:
-        path: out/
+        path: result/
 
   publish:
     environment:
