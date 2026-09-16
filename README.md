@@ -9,7 +9,7 @@ minimal modifications. I have a few QoL things I'd like to support as well.
 ### Chores
 - [ ] Move away from `gulp.js`?
 - [ ] Find modern alternative to `sourire` (molecule rendering is a bit odd compared to Wikipedia)
-      - Perhaps `rdkit.js` or `smiles-drawer`
+      - Perhaps `rdkit.js` or `smiles-drawer` (probably smiles-darwer)
 - [ ] coffeescript -> typescript
 - [ ] more in line with modern browser APIs, cleanup div soup
 - [ ] Remove backend once no longer needed

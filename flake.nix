@@ -48,7 +48,6 @@
 
                 frontend = pkgs.buildNpmPackage {
                   pname = "avogadrio-frontend";
-                  npmDepsHash = "sha256-jiX9mhcYJlmtYjLV+m+neYTsxCsxLux8c7pbYeJWDcI=";
                   inherit version;
 
                   src = lib.fileset.toSource {
@@ -63,6 +62,7 @@
                     ];
                   };
 
+                  npmDepsHash = "sha256-eqy6Sgjs9w46UFEaz5eA4Muw1DtCpHCxZCgfR15icfg=";
 
                   buildPhase = ''
                     runHook preBuild
@@ -79,6 +79,7 @@
                       node_modules/font-awesome/css/font-awesome.min.css \
                       node_modules/animate.css/animate.min.css \
                       node_modules/@melloware/coloris/dist/coloris.min.css \
+                      node_modules/smiles-drawer/dist/smiles-drawer.min.js \
                       $out/share/php/avogadrio/web/css/
                     cp -r node_modules/bootstrap/dist/js/bootstrap.min.js \
                       node_modules/@melloware/coloris/dist/umd/coloris.min.js \
