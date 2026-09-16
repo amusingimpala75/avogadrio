@@ -63,7 +63,7 @@ $(document).ready ->
   #
   buildUrl = (width, height, foreground, background, name) ->
     smiles = await moleculeName name
-    url = "/api/smiles/wallpaper/#{width}/#{height}/#{background}/#{foreground}/#{smiles}"
+    url = "/api/smiles/wallpaper/#{width}/#{height}/#{background}/#{foreground}/#{encodeURIComponent smiles}"
     qs = ""
     if customLabel != '' then qs += "label=#{customLabel}"
     if qs != '' then qs += "&"
@@ -81,7 +81,7 @@ $(document).ready ->
   #
   buildMoleculeOnlyUrl = (width, height, background, foreground, name) ->
     smiles = await moleculeName name
-    url = "/api/smiles/molecule/#{width}/#{height}/#{background}/#{foreground}/#{smiles}"
+    url = "/api/smiles/molecule/#{width}/#{height}/#{background}/#{foreground}/#{encodeURIComponent smiles}"
     qs = ""
     if customLabel != '' then qs += "label=#{customLabel}"
     if qs != '' then qs += "&"
@@ -156,13 +156,15 @@ $(document).ready ->
   # @param [string] name      the compound name
   #
   wikipediaMoleculeName = (name) ->
-    uri = "https://en.wikipedia.org/wiki/#{encodeURIComponent(name)}"
+    uri = "https://en.wikipedia.org/w/api.php?action=parse&format=json&page=#{encodeURIComponent(name)}&prop=text&origin=*"
     try
       data = await $.get(uri)
-      doc = new DOMParser().parseFromString(data, 'text/html')
-      for a in doc.querySelectAll('a')
+      html = data.parse.text["*"]
+      doc = new DOMParser().parseFromString(html, 'text/html')
+      for a in doc.querySelectorAll('a')
         if a.textContent.includes('SMILES')
-          smiles = a.parentElement.nextElementSibling?.textContent.trim()
+          container = a.closest('.mw-collapsible')
+          smiles = container?.querySelector('li')?.textContent.trim()
           if checkSmiles smiles
             return smiles
       return null

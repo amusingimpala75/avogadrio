@@ -12,7 +12,6 @@ minimal modifications. I have a few QoL things I'd like to support as well.
       - Perhaps `rdkit.js` or `smiles-drawer`
 - [ ] Remove backend once no longer needed
 - [ ] Clean up and modernize the code so the deprecation warnings are gone
-- [ ] Fix cyanide [C-#N] rendered as [C-]
 - [ ] Replace `spectrum-colorpicker` with something more modern (so we can update `jquery`)
 - [ ] Migrate Silex -> symfony/flex (unless we ditch the backend altogether)
 
