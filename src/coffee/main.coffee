@@ -97,7 +97,7 @@ $(document).ready ->
   # @param [name] name          the SMILES structure
   #
   buildSmilesUrl = (width, height, foreground, background, smiles) ->
-    url = "/api/smiles/#{width}/#{height}/#{background}/#{foreground}/#{smiles}"
+    url = "/api/smiles/wallpaper/#{width}/#{height}/#{background}/#{foreground}/#{smiles}"
     qs = ""
     if customLabel != '' then qs += "label=#{customLabel}"
     if qs != '' then qs += "&"
@@ -111,8 +111,8 @@ $(document).ready ->
   # @param [string] foreground  the molecule color (hex, without `#`)
   # @param [name] smiles        the SMILES structure
   #
-  buildSmilesMoleculeOnlyUrl = (width, height, foreground, smiles) ->
-    url = "/api/smiles/#{width}/#{height}/#{foreground}/#{smiles}"
+  buildSmilesMoleculeOnlyUrl = (width, height, foreground, background, smiles) ->
+    url = "/api/smiles/molecule/#{width}/#{height}/#{background}/#{foreground}/#{smiles}"
     qs = ""
     if customLabel != '' then qs += "label=#{customLabel}"
     if qs != '' then qs += "&"
@@ -248,7 +248,7 @@ $(document).ready ->
   refreshPreviewSmiles = ->
     currentCompoundSmiles = getCompoundSmiles()
     smilesMode = true
-    url = buildSmilesMoleculeOnlyUrl screenWidth, screenHeight, foregroundColor, currentCompoundSmiles, rotation
+    url = buildSmilesMoleculeOnlyUrl screenWidth, screenHeight, foregroundColor, backgroundColor, currentCompoundSmiles, rotation
     updatePreview previewElement, url, backgroundColor, rotation
 
   # Refreshes the preview using the compound name or SMILES structure text box depending on mode.
