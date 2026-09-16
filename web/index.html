@@ -25,12 +25,11 @@
         <link rel="stylesheet" type="text/css" href="/flat-ui/css/flat-ui.css">
         <link rel="stylesheet" type="text/css" href="/font-awesome/css/font-awesome.min.css">
         <link rel="stylesheet" type="text/css" href="/animate.css/animate.min.css">
-        <link rel="stylesheet" type="text/css" href="/spectrum-colorpicker/spectrum.css">
+        <link rel="stylesheet" type="text/css" href="/coloris/dist/coloris.min.css">
         <link rel="stylesheet" type="text/css" href="/css/sidebar.css">
         <link rel="stylesheet" type="text/css" href="/css/main.css">
-        <script type="text/javascript" src="/jquery/dist/jquery.min.js"></script>
         <script type="text/javascript" src="/bootstrap/dist/js/bootstrap.min.js"></script>
-        <script type="text/javascript" src="/spectrum-colorpicker/spectrum.js"></script>
+        <script type="text/javascript" src="/coloris/dist/umd/coloris.min.js"></script>
         <script type="text/javascript" src="/js-lib/pureknob.js"></script>
         <script type="text/javascript" src="/js/params.js"></script>
         <script type="text/javascript" src="/js/hamburger.js"></script>
@@ -120,16 +119,16 @@
                                 <div class="col-6">
                                     <div class="picker-lbl">Molecule:</div>
                                 </div>
-                                <div class="col-6">
-                                    <input type="text" class="picker picker-fg">
+                                <div class="col-6 full">
+                                    <input type="text" id="picker-fg" data-coloris>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-6">
                                     <div class="picker-lbl">Background:</div>
                                 </div>
-                                <div class="col-6">
-                                    <input type="text" class="picker picker-bg">
+                                <div class="col-6 full">
+                                    <input type="text" id="picker-bg" data-coloris>
                                 </div>
                             </div>
                         </div>

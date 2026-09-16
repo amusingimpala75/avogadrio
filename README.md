@@ -10,9 +10,10 @@ minimal modifications. I have a few QoL things I'd like to support as well.
 - [ ] Move away from `gulp.js`?
 - [ ] Find modern alternative to `sourire` (molecule rendering is a bit odd compared to Wikipedia)
       - Perhaps `rdkit.js` or `smiles-drawer`
+- [ ] coffeescript -> typescript
+- [ ] more in line with modern browser APIs, cleanup div soup
 - [ ] Remove backend once no longer needed
 - [ ] Clean up and modernize the code so the deprecation warnings are gone
-- [ ] Replace `spectrum-colorpicker` with something more modern (so we can update `jquery`)
 - [ ] Migrate Silex -> symfony/flex (unless we ditch the backend altogether)
 
 # Avogadrio

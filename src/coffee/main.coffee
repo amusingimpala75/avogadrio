@@ -1,4 +1,4 @@
-$(document).ready ->
+document.addEventListener 'DOMContentLoaded', ->
   # Screen dimensions.
   screenWidth = window.screen.width
   screenHeight = window.screen.height
@@ -19,35 +19,35 @@ $(document).ready ->
   currentCompoundSmiles = 'CCN(CC)C1=CC2=C(C=C1)N=C3C4=CC=CC=C4C(=O)C=C3O2'
 
   # Text entry fields for molecules.
-  compoundTextBox = $ '.comp-name'
-  smilesTextBox = $ '.comp-smiles'
-  customLabelTextBox = $ '.cust-lbl-tbox'
+  compoundTextBox = document.querySelector '.comp-name'
+  smilesTextBox = document.querySelector '.comp-smiles'
+  customLabelTextBox = document.querySelector '.cust-lbl-tbox'
 
   # Element to use for wallpaper preview.
-  previewElement = $ 'body, html'
+  previewElement = document.body
 
   # Download button element.
-  downloadButton = $ '.download-btn'
+  downloadButton = document.querySelector '.download-btn'
 
   # Error message elements.
-  errorRows = $ '.row-error'
-  invalidCompoundNameMessage = $ '.row-error-compound'
-  invalidCompoundSmilesMessage = $ '.row-error-smiles'
+  errorRows = document.querySelector '.row-error'
+  invalidCompoundNameMessage = document.querySelector '.row-error-compound'
+  invalidCompoundSmilesMessage = document.querySelector '.row-error-smiles'
 
   # Gets the sanitized compound name as entered by the user.
   #
   getCompoundName = ->
-    encodeURIComponent compoundTextBox.val()
+    encodeURIComponent compoundTextBox.value
 
   # Gets the sanitized compound SMILES structure as entered by the user.
   #
   getCompoundSmiles = ->
-    encodeURIComponent smilesTextBox.val()
+    encodeURIComponent smilesTextBox.value
 
   # Gets the sanitized custom molecule label as entered by the user.
   #
   getCustomLabel = ->
-    encodeURIComponent customLabelTextBox.val()
+    encodeURIComponent customLabelTextBox.value
 
   # URL builder functions for API.
 
@@ -143,7 +143,8 @@ $(document).ready ->
   cactusMoleculeName = (name) ->
     uri = "https://cactus.nci.nih.gov/chemical/structure/#{encodeURIComponent(name)}/smiles"
     try
-      data = await $.get(uri)
+      response = await fetch(uri)
+      data = await response.text()
       if checkSmiles data
         return data
       else
@@ -158,7 +159,8 @@ $(document).ready ->
   wikipediaMoleculeName = (name) ->
     uri = "https://en.wikipedia.org/w/api.php?action=parse&format=json&page=#{encodeURIComponent(name)}&prop=text&origin=*"
     try
-      data = await $.get(uri)
+      response = await fetch(uri)
+      data = await response.json()
       html = data.parse.text["*"]
       doc = new DOMParser().parseFromString(html, 'text/html')
       for a in doc.querySelectorAll('a')
@@ -205,8 +207,8 @@ $(document).ready ->
     url = await buildUrl screenWidth, screenHeight, foregroundColor, backgroundColor, currentCompoundName
     if smilesMode
       url = buildSmilesUrl screenWidth, screenHeight, foregroundColor, backgroundColor, currentCompoundSmiles
-    downloadButton.attr 'download', if smilesMode then 'smiles_molecule' else currentCompoundName
-    downloadButton.attr 'href', url
+    downloadButton.setAttribute 'download', if smilesMode then 'smiles_molecule' else currentCompoundName
+    downloadButton.setAttribute 'href', url
 
   # Updates the page URL (query string) according to the currently displayed molecule.
   #
@@ -230,10 +232,10 @@ $(document).ready ->
   # @param [string] background  the background color (hex, without `#`)
   #
   updatePreview = (element, url, background) ->
-    element.css 'background', "url('#{url}')"
-    element.css 'background-color', "##{background}"
-    element.css 'background-position', '50% 50%'
-    element.css 'background-repeat', 'no-repeat'
+    element.style.background = "url('#{url}')"
+    element.style.backgroundColor = "##{background}"
+    element.style.backgroundPosition = '50% 50%'
+    element.style.backgroundRepeat = 'no-repeat'
     updateDownloadLink()
     updateUrl()
 
@@ -266,28 +268,23 @@ $(document).ready ->
   if passedBackground != null && checkColor(passedBackground)
     backgroundColor = passedBackground
 
-  # Let's initialize the color pickers.
-
-  $('.picker-fg').spectrum
-    color: "##{foregroundColor}"
-    clickoutFiresChange: true
-    chooseText: 'Update'
-    preferredFormat: 'hex'
-
-  $('.picker-bg').spectrum
-    color: "##{backgroundColor}"
-    clickoutFiresChange: true
-    chooseText: 'Update'
-    preferredFormat: 'hex'
+  # Initialize the Coloris fields with the selected colors. Coloris watches
+  # these native input events to keep its swatches in sync.
+  Coloris { themeMode: 'dark', alpha: false, theme: 'polaroid' }
+  foregroundPicker = document.querySelector '#picker-fg'
+  backgroundPicker = document.querySelector '#picker-bg'
+  foregroundPicker.value = "##{foregroundColor}"
+  backgroundPicker.value = "##{backgroundColor}"
+  foregroundPicker.dispatchEvent new Event 'input', bubbles: true
+  backgroundPicker.dispatchEvent new Event 'input', bubbles: true
 
   # Set up color picker change events.
-
-  $('.picker-fg').on 'change', (e) ->
-    foregroundColor = $(e.target).val().substring(1)
+  foregroundPicker.addEventListener 'change', (e) ->
+    foregroundColor = e.target.value.substring(1)
     modeAwareRefreshPreview()
 
-  $('.picker-bg').on 'change', (e) ->
-    backgroundColor = $(e.target).val().substring(1)
+  backgroundPicker.addEventListener 'change', (e) ->
+    backgroundColor = e.target.value.substring(1)
     modeAwareRefreshPreview()
 
   # Set up the rotation knob.
@@ -311,16 +308,16 @@ $(document).ready ->
 
   # Compound name update button should refresh the preview.
 
-  $('.update-btn').on 'click', (e) ->
-    errorRows.hide()
+  document.querySelector('.update-btn').addEventListener 'click', (e) ->
+    errorRows.style.display = 'none'
     if await checkMoleculeName getCompoundName()
       refreshPreviewCompoundName()
     else
       failPreview()
 
-  $('.update-smiles-btn').on 'click', (e) ->
+  document.querySelector('.update-smiles-btn').addEventListener 'click', (e) ->
     smilesMode = true
-    errorRows.hide()
+    errorRows.style.display = 'none'
     if checkSmiles getCompoundSmiles()
       refreshPreviewSmiles()
     else
@@ -328,7 +325,7 @@ $(document).ready ->
 
   # Label update button should also refresh preview.
 
-  $('.update-lbl-btn').on 'click', (e) ->
+  document.querySelector('.update-lbl-btn').addEventListener 'click', (e) ->
     customLabel = getCustomLabel()
     modeAwareRefreshPreview()
 
@@ -336,17 +333,17 @@ $(document).ready ->
 
   passedCompoundName = getParameterByName 'compound'
   if passedCompoundName != null
-    compoundTextBox.val(passedCompoundName)
+    compoundTextBox.value = passedCompoundName
     smilesMode = false
 
   passedSmiles = getParameterByName 'smiles'
   if passedSmiles != null
-    smilesTextBox.val(passedSmiles)
+    smilesTextBox.value = passedSmiles
     smilesMode = true
 
   passedLabel = getParameterByName 'label'
   if passedLabel != null
-    customLabelTextBox.val(passedLabel)
+    customLabelTextBox.value = passedLabel
 
   passedRotation = getParameterByName 'rotation'
   if passedRotation != null
@@ -354,9 +351,9 @@ $(document).ready ->
 
   # Grab initial values from UI.
 
-  currentCompoundName = compoundTextBox.val()
-  currentCompoundSmiles = smilesTextBox.val()
-  customLabel = customLabelTextBox.val()
+  currentCompoundName = compoundTextBox.value
+  currentCompoundSmiles = smilesTextBox.value
+  customLabel = customLabelTextBox.value
   rotation = rotationKnob.getValue()
 
   # Initial update.

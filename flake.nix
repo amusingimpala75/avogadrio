@@ -60,7 +60,7 @@
                   pname = "avogadrio-frontend";
                   inherit src version;
 
-                  npmDepsHash = "sha256-naJZj8RqZFAm0cwjBX1ZUgWhbiZz12NOWEVzJineTGk=";
+                  npmDepsHash = "sha256-jiX9mhcYJlmtYjLV+m+neYTsxCsxLux8c7pbYeJWDcI=";
 
                   buildPhase = ''
                     runHook preBuild
@@ -70,10 +70,9 @@
 
                   installPhase = ''
                     mkdir -p $out
-                    cp -r web/css web/js node_modules/jquery \
-                      node_modules/bootstrap node_modules/spectrum-colorpicker \
-                      node_modules/animate.css node_modules/font-awesome \
-                      node_modules/flat-ui $out/
+                    cp -r web/css web/js node_modules/@melloware/coloris \
+                      node_modules/bootstrap node_modules/font-awesome \
+                      node_modules/animate.css node_modules/flat-ui $out/
                   '';
                 };
 
@@ -104,10 +103,10 @@
                 nativeBuildInputs = [ pkgs.makeWrapper ];
 
                 postInstall = ''
-                  cp -r ${frontend}/js ${frontend}/css ${frontend}/jquery \
-                    ${frontend}/bootstrap ${frontend}/spectrum-colorpicker \
-                    ${frontend}/animate.css ${frontend}/font-awesome \
-                    ${frontend}/flat-ui $out/share/php/avogadrio/web/
+                  cp -r ${frontend}/js ${frontend}/css ${frontend}/flat-ui \
+                    ${frontend}/bootstrap ${frontend}/animate.css \
+                    ${frontend}/font-awesome ${frontend}/coloris \
+                    $out/share/php/avogadrio/web/
 
                   mkdir -p $out/etc/avogadrio
                   cp ${./config/config.yaml.dist} $out/etc/avogadrio/config.yaml
