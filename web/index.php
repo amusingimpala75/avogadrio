@@ -2,7 +2,9 @@
 
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
 
-require_once __DIR__ . '/../vendor/autoload.php';
+$dir = $_SERVER['DOCUMENT_ROOT'];
+
+require_once $dir . '/../vendor/autoload.php';
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,8 +34,8 @@ $moleculeRenderer->setRenderChiralLabels(false); // Disable chiral labels.
 /**
  * Action for frontend route.
  */
-$app->get('/', function () use ($config) {
-    return file_get_contents(__DIR__.'/index.html');
+$app->get('/', function () use ($config, $dir) {
+    return file_get_contents($dir .'/index.html');
 });
 
 /**

@@ -44,23 +44,25 @@
 
             avogadrio =
               let
-                src = lib.cleanSourceWith {
-                  src = ./.;
-                  filter = path: type:
-                    let
-                      name = lib.baseNameOf path;
-                    in
-                      !(builtins.elem name [ "flake.nix" "flake.lock" "README.md" ])
-                      && lib.cleanSourceFilter path type;
-                };
-
                 version = "1.0.0";
 
                 frontend = pkgs.buildNpmPackage {
                   pname = "avogadrio-frontend";
-                  inherit src version;
-
                   npmDepsHash = "sha256-jiX9mhcYJlmtYjLV+m+neYTsxCsxLux8c7pbYeJWDcI=";
+                  inherit version;
+
+                  src = lib.fileset.toSource {
+                    root = ./.;
+                    fileset = lib.fileset.unions [
+                      ./gulpfile.js
+                      ./package.json
+                      ./package-lock.json
+                      ./src/less
+                      ./src/coffee
+                      ./web
+                    ];
+                  };
+
 
                   buildPhase = ''
                     runHook preBuild
@@ -69,10 +71,19 @@
                   '';
 
                   installPhase = ''
-                    mkdir -p $out
-                    cp -r web/css web/js node_modules/@melloware/coloris \
-                      node_modules/bootstrap node_modules/font-awesome \
-                      node_modules/animate.css node_modules/flat-ui $out/
+                    mkdir -p $out/share/php/avogadrio/web
+                    cp -r web/css web/js $out/share/php/avogadrio/web/
+                    cp -r node_modules/bootstrap/dist/css/bootstrap.min.css \
+                      node_modules/bootstrap/dist/css/bootstrap.min.css.map \
+                      node_modules/flat-ui/css/flat-ui.css \
+                      node_modules/font-awesome/css/font-awesome.min.css \
+                      node_modules/animate.css/animate.min.css \
+                      node_modules/@melloware/coloris/dist/coloris.min.css \
+                      $out/share/php/avogadrio/web/css/
+                    cp -r node_modules/bootstrap/dist/js/bootstrap.min.js \
+                      node_modules/@melloware/coloris/dist/umd/coloris.min.js \
+                      $out/share/php/avogadrio/web/js
+                    cp -r node_modules/flat-ui/fonts $out/share/php/avogadrio/web/
                   '';
                 };
 
@@ -92,30 +103,43 @@
                   mbstring
                   # openssl
                 ]);
+
+                backend = php.buildComposerProject2 (finalAttrs: {
+                  pname = "avogadrio";
+
+                  inherit version;
+
+                  src = lib.fileset.toSource {
+                    root = ./.;
+                    fileset = lib.fileset.unions [
+                      ./composer.json
+                      ./composer.lock
+                      ./src
+                      ./web
+                    ];
+                  };
+
+                  vendorHash = "sha256-BL6/JpBhxBBhLGW8ZBhdIZQqUVby3nDnEbcG1aUV9cM=";
+
+                  postInstall = ''
+                    mkdir -p $out/share/avogadrio
+                    cp ${./config/config.yaml.dist} $out/share/avogadrio/config.yaml.dist
+                  '';
+                });
               in
-              php.buildComposerProject2 (finalAttrs: {
-                pname = "avogadrio";
+                pkgs.symlinkJoin {
+                  name = "avogadrio-full";
+                  paths = [ frontend backend ];
 
-                inherit frontend src version;
+                  nativeBuildInputs = [ pkgs.makeWrapper ];
 
-                vendorHash = "sha256-BL6/JpBhxBBhLGW8ZBhdIZQqUVby3nDnEbcG1aUV9cM=";
-
-                nativeBuildInputs = [ pkgs.makeWrapper ];
-
-                postInstall = ''
-                  cp -r ${frontend}/js ${frontend}/css ${frontend}/flat-ui \
-                    ${frontend}/bootstrap ${frontend}/animate.css \
-                    ${frontend}/font-awesome ${frontend}/coloris \
-                    $out/share/php/avogadrio/web/
-
-                  mkdir -p $out/etc/avogadrio
-                  cp ${./config/config.yaml.dist} $out/etc/avogadrio/config.yaml
-
-                  makeWrapper ${lib.getExe php} $out/bin/avogadrio \
-                    --add-flags "-t $out/share/php/avogadrio/web" \
-                    --set-default AVOGADRIO_CONFIG "$out/etc/avogadrio/config.yaml"
-                '';
-              });
+                  postBuild = ''
+                    makeWrapper ${lib.getExe php} $out/bin/avogadrio \
+                      --add-flags "-t $out/share/php/avogadrio/web" \
+                      --set-default AVOGADRIO_CONFIG "$out/share/avogadrio/config.yaml.dist"
+                  '';
+                  passthru = { inherit frontend backend; };
+                };
 
             sourire =
               let
@@ -213,8 +237,8 @@
           devShells.default = pkgs.mkShell {
             inputsFrom = [
               self'.packages.sourire
-              self'.packages.avogadrio
               self'.packages.avogadrio.frontend
+              self'.packages.avogadrio.backend
             ];
             packages = [ self'.packages.sourire.locker ];
           };
