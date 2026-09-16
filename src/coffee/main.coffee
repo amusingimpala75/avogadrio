@@ -1,7 +1,7 @@
 document.addEventListener 'DOMContentLoaded', ->
-  # Screen dimensions.
-  screenWidth = window.screen.width
-  screenHeight = window.screen.height
+  # Download canvas dimensions.
+  downloadWidth = 1920
+  downloadHeight = 1080
 
   # Wallpaper color attributes.
   foregroundColor = 'ce3838'
@@ -23,108 +23,29 @@ document.addEventListener 'DOMContentLoaded', ->
   smilesTextBox = document.querySelector '.comp-smiles'
   customLabelTextBox = document.querySelector '.cust-lbl-tbox'
 
-  # Element to use for wallpaper preview.
-  previewElement = document.body
+  # Element to use for the SVG wallpaper preview.
+  previewElement = document.querySelector '#smiles-svg'
 
-  # Download button element.
+  # Download button element and its current object URL.
   downloadButton = document.querySelector '.download-btn'
+  downloadUrl = null
 
   # Error message elements.
   errorRows = document.querySelector '.row-error'
   invalidCompoundNameMessage = document.querySelector '.row-error-compound'
   invalidCompoundSmilesMessage = document.querySelector '.row-error-smiles'
 
-  # Gets the sanitized compound name as entered by the user.
+  # Gets the compound data as entered by the user. The raw values are needed by
+  # SmilesDrawer; query-string encoding is applied only when the page URL changes.
   #
   getCompoundName = ->
-    encodeURIComponent compoundTextBox.value
+    compoundTextBox.value
 
-  # Gets the sanitized compound SMILES structure as entered by the user.
-  #
   getCompoundSmiles = ->
-    encodeURIComponent smilesTextBox.value
+    smilesTextBox.value
 
-  # Gets the sanitized custom molecule label as entered by the user.
-  #
   getCustomLabel = ->
-    encodeURIComponent customLabelTextBox.value
-
-  # URL builder functions for API.
-
-  # Builds a URL to generate a wallpaper image from a compound name.
-  #
-  # This function is now async
-  #
-  # @param [int] width          the width of the image
-  # @param [int] height         the height of the image
-  # @param [string] foreground  the molecule color (hex, without `#`)
-  # @param [string] background  the background color (hex, without `#`)
-  # @param [name] name          the compound name
-  #
-  buildUrl = (width, height, foreground, background, name) ->
-    smiles = await moleculeName name
-    url = "/api/smiles/wallpaper/#{width}/#{height}/#{background}/#{foreground}/#{encodeURIComponent smiles}"
-    qs = ""
-    if customLabel != '' then qs += "label=#{customLabel}"
-    if qs != '' then qs += "&"
-    if rotation != 0 then qs += "rotation=#{rotation}"
-    return if qs == "" then url else url + "?" + qs
-
-  # Builds a URL to generate a molecule-only image from a compound name.
-  #
-  # This function is now async
-  #
-  # @param [int] width          the width of the image if it were rendered as a wallpaper
-  # @param [int] height         the height of the image if it were rendered as a wallpaper
-  # @param [string] foreground  the molecule color (hex, without `#`)
-  # @param [name] name          the compound name
-  #
-  buildMoleculeOnlyUrl = (width, height, background, foreground, name) ->
-    smiles = await moleculeName name
-    url = "/api/smiles/molecule/#{width}/#{height}/#{background}/#{foreground}/#{encodeURIComponent smiles}"
-    qs = ""
-    if customLabel != '' then qs += "label=#{customLabel}"
-    if qs != '' then qs += "&"
-    if rotation != 0 then qs += "rotation=#{rotation}"
-    return if qs == "" then url else url + "?" + qs
-
-  # Builds a URL to generate a wallpaper image from a SMILES structure.
-  #
-  # @param [int] width          the width of the image
-  # @param [int] height         the height of the image
-  # @param [string] foreground  the molecule color (hex, without `#`)
-  # @param [string] background  the background color (hex, without `#`)
-  # @param [name] name          the SMILES structure
-  #
-  buildSmilesUrl = (width, height, foreground, background, smiles) ->
-    url = "/api/smiles/wallpaper/#{width}/#{height}/#{background}/#{foreground}/#{smiles}"
-    qs = ""
-    if customLabel != '' then qs += "label=#{customLabel}"
-    if qs != '' then qs += "&"
-    if rotation != 0 then qs += "rotation=#{rotation}"
-    return if qs == "" then url else url + "?" + qs
-
-  # Builds a URL to generate a molecule-only image from a SMILES structure.
-  #
-  # @param [int] width          the width of the image if it were rendered as a wallpaper
-  # @param [int] height         the height of the image if it were rendered as a wallpaper
-  # @param [string] foreground  the molecule color (hex, without `#`)
-  # @param [name] smiles        the SMILES structure
-  #
-  buildSmilesMoleculeOnlyUrl = (width, height, foreground, background, smiles) ->
-    url = "/api/smiles/molecule/#{width}/#{height}/#{background}/#{foreground}/#{smiles}"
-    qs = ""
-    if customLabel != '' then qs += "label=#{customLabel}"
-    if qs != '' then qs += "&"
-    if rotation != 0 then qs += "rotation=#{rotation}"
-    return if qs == "" then url else url + "?" + qs
-
-  # Checks if a compound name can be converted to SMILES using the configured database.
-  #
-  # @param [string] name      the compound name
-  #
-  checkMoleculeName = (name) ->
-    return (await moleculeName name) != null
+    customLabelTextBox.value
 
   # Gets a compound SMILES if its name is found in configured databases.
   #
@@ -201,59 +122,119 @@ document.addEventListener 'DOMContentLoaded', ->
   failPreviewSmiles = ->
     invalidCompoundSmilesMessage.show()
 
-  # Updates the download link according to the currently displayed molecule.
+  # Updates the download link with a PNG rendered from the 1920x1080 SVG.
   #
   updateDownloadLink = ->
-    url = await buildUrl screenWidth, screenHeight, foregroundColor, backgroundColor, currentCompoundName
-    if smilesMode
-      url = buildSmilesUrl screenWidth, screenHeight, foregroundColor, backgroundColor, currentCompoundSmiles
-    downloadButton.setAttribute 'download', if smilesMode then 'smiles_molecule' else currentCompoundName
-    downloadButton.setAttribute 'href', url
+    svg = new XMLSerializer().serializeToString previewElement
+    image = new Image()
+    image.onload = ->
+      canvas = document.createElement 'canvas'
+      canvas.width = downloadWidth
+      canvas.height = downloadHeight
+      canvas.getContext('2d').drawImage image, 0, 0, downloadWidth, downloadHeight
+      canvas.toBlob (blob) ->
+        URL.revokeObjectURL(downloadUrl) if downloadUrl != null
+        downloadUrl = URL.createObjectURL blob
+        filename = if smilesMode then 'smiles_molecule.png' else "#{currentCompoundName}.png"
+        downloadButton.setAttribute 'download', filename
+        downloadButton.setAttribute 'href', downloadUrl
+      , 'image/png'
+    image.src = "data:image/svg+xml;charset=utf-8,#{encodeURIComponent(svg)}"
 
   # Updates the page URL (query string) according to the currently displayed molecule.
   #
   updateUrl = ->
     params = {
-      'label': customLabel,
+      'label': encodeURIComponent(customLabel),
       'background': backgroundColor,
       'foreground': foregroundColor,
       'rotation': rotation
     }
     if smilesMode
-      params['smiles'] = currentCompoundSmiles
+      params['smiles'] = encodeURIComponent(currentCompoundSmiles)
     else
-      params['compound'] = currentCompoundName
+      params['compound'] = encodeURIComponent(currentCompoundName)
     setQueryParams params
 
-  # Updates the displayed preview.
+  # Renders a SMILES structure as a self-contained wallpaper SVG. SmilesDrawer
+  # draws into a nested SVG so its content can be centered within the fixed-size
+  # wallpaper canvas.
   #
-  # @param [object] element     the element to update
-  # @param [string] url         the URL of the image to preview
-  # @param [string] background  the background color (hex, without `#`)
-  #
-  updatePreview = (element, url, background) ->
-    element.style.background = "url('#{url}')"
-    element.style.backgroundColor = "##{background}"
-    element.style.backgroundPosition = '50% 50%'
-    element.style.backgroundRepeat = 'no-repeat'
-    updateDownloadLink()
-    updateUrl()
+  renderSmiles = (smiles, onError = failPreviewSmiles) ->
+    SmilesDrawer.parse smiles, (tree) ->
+      namespace = 'http://www.w3.org/2000/svg'
+      createElement = (name) -> document.createElementNS namespace, name
+      foreground = "##{foregroundColor}"
+      theme = {}
+      for element in ['C', 'O', 'N', 'F', 'CL', 'BR', 'I', 'P', 'S', 'B', 'SI', 'H']
+        theme[element] = foreground
+      theme.BACKGROUND = "##{backgroundColor}"
+
+      molecule = createElement 'svg'
+      drawer = new SmilesDrawer.SvgDrawer {
+        themes:
+          light: theme
+      }
+      drawer.draw tree, molecule, 'light'
+      molecule.style.width = ''
+      molecule.style.height = ''
+      molecule.setAttribute 'x', 192
+      molecule.setAttribute 'y', 108
+      molecule.setAttribute 'width', 1536
+      molecule.setAttribute 'height', 864
+      molecule.setAttribute 'preserveAspectRatio', 'xMidYMid meet'
+
+      while previewElement.firstChild
+        previewElement.removeChild previewElement.firstChild
+      previewElement.setAttribute 'xmlns', namespace
+      previewElement.setAttribute 'width', downloadWidth
+      previewElement.setAttribute 'height', downloadHeight
+      previewElement.setAttribute 'viewBox', "0 0 #{downloadWidth} #{downloadHeight}"
+
+      document.documentElement.style.backgroundColor = "##{backgroundColor}"
+      document.body.style.backgroundColor = "##{backgroundColor}"
+
+      background = createElement 'rect'
+      background.setAttribute 'width', '100%'
+      background.setAttribute 'height', '100%'
+      background.setAttribute 'fill', "##{backgroundColor}"
+      previewElement.appendChild background
+
+      drawing = createElement 'g'
+      drawing.setAttribute 'transform', "rotate(#{rotation} #{downloadWidth / 2} #{downloadHeight / 2})"
+      drawing.appendChild molecule
+      if customLabel != ''
+        label = createElement 'text'
+        label.setAttribute 'x', downloadWidth / 2
+        label.setAttribute 'y', downloadHeight - 48
+        label.setAttribute 'fill', foreground
+        label.setAttribute 'font-size', 32
+        label.setAttribute 'text-anchor', 'middle'
+        label.textContent = customLabel
+        drawing.appendChild label
+      previewElement.appendChild drawing
+
+      updateDownloadLink()
+      updateUrl()
+    , -> onError()
 
   # Refreshes the preview using the compound name text box.
   #
   refreshPreviewCompoundName = ->
     currentCompoundName = getCompoundName()
     smilesMode = false
-    url = await buildMoleculeOnlyUrl screenWidth, screenHeight, backgroundColor, foregroundColor, currentCompoundName, rotation
-    updatePreview previewElement, url, backgroundColor, rotation
+    smiles = await moleculeName currentCompoundName
+    if smiles != null
+      renderSmiles smiles, failPreview
+    else
+      failPreview()
 
   # Refreshes the preview using the SMILES structure text box.
   #
   refreshPreviewSmiles = ->
     currentCompoundSmiles = getCompoundSmiles()
     smilesMode = true
-    url = buildSmilesMoleculeOnlyUrl screenWidth, screenHeight, foregroundColor, backgroundColor, currentCompoundSmiles, rotation
-    updatePreview previewElement, url, backgroundColor, rotation
+    renderSmiles currentCompoundSmiles
 
   # Refreshes the preview using the compound name or SMILES structure text box depending on mode.
   #
@@ -310,18 +291,12 @@ document.addEventListener 'DOMContentLoaded', ->
 
   document.querySelector('.update-btn').addEventListener 'click', (e) ->
     errorRows.style.display = 'none'
-    if await checkMoleculeName getCompoundName()
-      refreshPreviewCompoundName()
-    else
-      failPreview()
+    refreshPreviewCompoundName()
 
   document.querySelector('.update-smiles-btn').addEventListener 'click', (e) ->
     smilesMode = true
     errorRows.style.display = 'none'
-    if checkSmiles getCompoundSmiles()
-      refreshPreviewSmiles()
-    else
-      failPreviewSmiles()
+    refreshPreviewSmiles()
 
   # Label update button should also refresh preview.
 

@@ -79,10 +79,10 @@
                       node_modules/font-awesome/css/font-awesome.min.css \
                       node_modules/animate.css/animate.min.css \
                       node_modules/@melloware/coloris/dist/coloris.min.css \
-                      node_modules/smiles-drawer/dist/smiles-drawer.min.js \
                       $out/share/php/avogadrio/web/css/
                     cp -r node_modules/bootstrap/dist/js/bootstrap.min.js \
                       node_modules/@melloware/coloris/dist/umd/coloris.min.js \
+                      node_modules/smiles-drawer/dist/smiles-drawer.min.js \
                       $out/share/php/avogadrio/web/js
                     cp -r node_modules/flat-ui/fonts $out/share/php/avogadrio/web/
                   '';
