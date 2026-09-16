@@ -1,6 +1,8 @@
 Seeing as the website is down last I checked I figured I try running this locally,
-so I added nix packaging scripts for both this and sourire which this requires, with
-minimal modifications. I have a few QoL things I'd like to support as well.
+so I added nix packaging scripts for this, and iteratively turned this into a local
+website that does NOT provide a web API. A bit of a downside, but I didn't want to
+bother with hosting docker containers if I didn't have to. I have a few QoL things
+I'd like to support as well.
 
 ### Planned Additions
 - [ ] Should be able to customize the resolution instead of defaulting to 1920x1080
@@ -8,52 +10,27 @@ minimal modifications. I have a few QoL things I'd like to support as well.
 - [ ] Searchable dropdown for the compounds
 ### Chores
 - [ ] Move away from `gulp.js`?
-- [ ] Find modern alternative to `sourire` (molecule rendering is a bit odd compared to Wikipedia)
-      - Perhaps `rdkit.js` or `smiles-drawer` (probably smiles-darwer)
 - [ ] coffeescript -> typescript
 - [ ] more in line with modern browser APIs, cleanup div soup
-- [ ] Remove backend once no longer needed
-- [ ] Clean up and modernize the code so the deprecation warnings are gone
-- [ ] Migrate Silex -> symfony/flex (unless we ditch the backend altogether)
 
 # Avogadrio
 Worship your favorite molecule by setting it as your wallpaper.
 
 Avogadrio is a web app that will render your favourite molecule as a desktop wallpaper from either a compund name or
 [SMILES structure](https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system). Molecule rendering
-is designed to be powered by [Sourire](https://github.com/tmoerman/sourire) which itself wraps the
-[Indigo cheminformatics toolkit](https://github.com/ggasoftware/indigo). Built on the
-[Silex](https://github.com/silexphp/Silex) micro-framework.
+is designed to be powered by [smiles-drawer](https://github.com/reymond-group/smilesDrawer).
 
 ![Logo](logo.png)
 
 ## Prerequisites
-You'll need to have a web server installed and configured with PHP for this to work. I really recommend [XAMPP](https://www.apachefriends.org/), especially for Windows users. Once you've done that you can proceed.
+You'll need to have a web server installed for hosting static files. Once you've done that you can proceed.
 
 You'll also need [Node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/) installed and working.
-
-## Configuration
-A couple of files need changing to get the site working for you.
-
-1. Copy `config/config.yaml.dist` and rename it to `config.yaml`. Fill in the fields according to their descriptions and save.
-2. For `sourire_service` you'll want to point it to your local [Sourire](https://github.com/tmoerman/sourire) server. For example `http://localhost:8080/`.
 
 ## Building
 Clone the project down and open the folder in your favourite editor.
 
-Before anything else, note that this project uses the [Composer](https://getcomposer.org/) package manager. Install composer (see their website) and run:
-
-```
-composer install
-```
-
-Or alternatively, if you're using the PHAR (make sure the `php.exe` executable is in your PATH):
-
-```
-php composer.phar install
-```
-
-Then, install the npm packages necessary to build and run the website. Run the following in your terminal in the project root directory:
+Install the npm packages necessary to build and run the website. Run the following in your terminal in the project root directory:
 
 ```
 npm install
@@ -72,6 +49,5 @@ A big thank you to:
 
 * [Nile Red](https://www.youtube.com/user/TheRedNile) inspired me to build this. I wasn't that big on chemistry until I came across his videos.
 * [Jay Holtslander](https://codepen.io/j_holtslander/) put together the hamburger menu/sidebar combo in his [Pen](https://codepen.io/j_holtslander/pen/XmpMEp) on CodePen. I believe it's derived from earlier work by [maridlcrmn](https://bootsnipp.com/maridlcrmn).
-* [Thomas Moerman](https://github.com/tmoerman) created [Sourire](https://github.com/tmoerman/sourire), which really simplified the molecule rendering process.
 * [Andre Plötze](https://github.com/andrepxx) created [pure-knob](https://github.com/andrepxx/pure-knob), which is used here for the rotation knob/wheel/dial thing.
 * [Contributors to this awesome repo](https://github.com/spothq/cryptocurrency-icons) which provides the cryptocurrency donation icons in the web app (they aren't bundled here).

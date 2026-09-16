@@ -1,5 +1,0 @@
-# Don't commit this file to source control, it contains your secret settings.
-
-twitter_url: ~ # The URL of your Twitter profile.
-github_url: ~ # The URL of your GitHub profile.
-sourire_service: "http://localhost:8081/" # The URL of the Sourire molecule rendering service
